@@ -8,14 +8,14 @@ import (
 	"log"
 )
 
-var db *gorm.DB
+var Db *gorm.DB
 
 func init() {
 	var err error
-	db,err = gorm.Open(conf.DBType,conf.DbUrl)
+	Db, err = gorm.Open(conf.DBType, conf.DbUrl)
 	if err != nil {
 		log.Println(err)
 	}
-	db.SingularTable(true)
-	db.AutoMigrate(&models.Auth{})
+	Db.SingularTable(true)
+	Db.AutoMigrate(&models.Auth{})
 }

@@ -5,10 +5,13 @@ import (
 )
 
 type Auth struct {
-	AuthId uint `gorm:"primary_key;auto-increment"`
-	Name string
+	AuthId   uint `gorm:"primary_key;auto-increment"`
+	Name     string
 	Password string
-	Token string
-	Mail string
 }
 
+type LO struct {
+	LOid      string
+	Likes     int
+	Announcer string
+}

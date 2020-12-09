@@ -10,9 +10,10 @@ func InitRouter() *gin.Engine {
 	router := gin.Default()
 	// 解决跨域问题
 	router.Use(cors())
-	auth := router.Group("/api/auth")
+	auth := router.Group("/auth")
 	{
 		auth.POST("/login", controllers.Login)
+		auth.POST("/register", controllers.Register)
 	}
 	return router
 }
