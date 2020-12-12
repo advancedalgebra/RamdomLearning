@@ -1,25 +1,25 @@
 package conf
 
-import(
+import (
 	"github.com/go-ini/ini"
 	"log"
 )
 
 var (
 	RunMode string
-	Port int
+	Port    int
 
-	User string
+	User     string
 	Password string
-	Host string
+	Host     string
 	Database string
-	DBType string
-	DbUrl string
+	DBType   string
+	DbUrl    string
 )
 
 func init() {
-	Cfg,err := ini.Load("conf/app.ini")
-	if err!=nil{
+	Cfg, err := ini.Load("conf/app.ini")
+	if err != nil {
 		log.Fatalf("Fail to parse 'conf/app.ini': %v", err)
 	}
 	RunMode = Cfg.Section("").Key("RUN_MODE").String()
@@ -29,15 +29,16 @@ func init() {
 }
 
 func loadDatabase(Cfg *ini.File) {
-	sec,err := Cfg.GetSection("database")
-	if err!=nil {
+	sec, err := Cfg.GetSection("database")
+	if err != nil {
 		log.Fatalf("Fail to get section 'database': %v", err)
 	}
 	User = sec.Key("USER").String()
 	Password = sec.Key("PASSWORD").String()
-	Host = sec.Key("PORT").String()
+	Host = sec.Key("HOST").String()
 	Database = sec.Key("DATABASE").String()
 	DBType = sec.Key("TYPE").String()
 	DbUrl = User + ":" + Password + "@tcp(" + Host + ")/" +
 		Database + "?parseTime=true&charset=utf8&loc=Local"
+	//print(DbUrl)
 }

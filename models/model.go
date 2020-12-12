@@ -1,8 +1,7 @@
-package dao
+package models
 
 import (
 	"RamdomLearning/conf"
-	"RamdomLearning/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
@@ -17,5 +16,5 @@ func init() {
 		log.Println(err)
 	}
 	Db.SingularTable(true)
-	Db.AutoMigrate(&models.Auth{})
+	Db.AutoMigrate(&Auths{}, &Users{})
 }
