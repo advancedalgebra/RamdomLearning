@@ -40,8 +40,8 @@ func QueryUser(username string, user *Users) (err error) {
 	return
 }
 
-func QueryAuth(username string, password string, auth *Auths) (err error) {
-	err = Db.Where(&Auths{Username: username, Password: password}).First(&auth).Error
+func QueryAuth(username, attribute, value string, auth *Auths) (err error) {
+	err = Db.Where(map[string]interface{}{"username": username, attribute: value}).First(&auth).Error
 	return
 }
 
@@ -50,9 +50,10 @@ func DeleteUser(username string) (err error) {
 	return
 }
 
-//func (user *Auths) Update(attribute,value string) {
-//	Db.Model(user).Update(attribute,value)
-//}
+func UpdateAuth(attribute, value, username string, auth *Auths) (err error) {
+	err = Db.Model(auth).Where(&Auths{Username: username}).Update(attribute, value).Error
+	return err
+}
 
 //func (token *Token) Query() bool{
 //	var user Auth

@@ -14,6 +14,7 @@ func InitRouter() *gin.Engine {
 	{
 		auth.POST("/login", controllers.Login)
 		auth.POST("/register", controllers.Register)
+		auth.POST("/logout", controllers.Logout)
 	}
 	return router
 }
