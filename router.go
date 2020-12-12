@@ -13,7 +13,7 @@ func InitRouter() *gin.Engine {
 	auth := router.Group("/auth")
 	{
 		auth.POST("/login", controllers.Login)
-		//auth.POST("/register", controllers.Register)
+		auth.POST("/register", controllers.Register)
 	}
 	return router
 }

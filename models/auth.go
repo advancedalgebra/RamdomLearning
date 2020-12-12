@@ -15,7 +15,7 @@ type Users struct {
 	LikesCount  uint   `gorm:"default:0"`
 	Location    string
 	CreatedAt   time.Time
-	DeletedAt   time.Time `gorm:"default:"`
+	DeletedAt   time.Time `gorm:"default:null"`
 }
 
 type Auths struct {
@@ -36,7 +36,12 @@ func CreateUser(user *Users) (err error) {
 }
 
 func QueryUser(username string, user *Users) (err error) {
-	err = Db.Debug().Where(&Users{Username: username}).First(&user).Error
+	err = Db.Where(&Users{Username: username}).First(&user).Error
+	return
+}
+
+func QueryAuth(username string, password string, auth *Auths) (err error) {
+	err = Db.Where(&Auths{Username: username, Password: password}).First(&auth).Error
 	return
 }
 
