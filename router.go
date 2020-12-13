@@ -15,6 +15,10 @@ func InitRouter() *gin.Engine {
 		auth.POST("/login", controllers.Login)
 		auth.POST("/register", controllers.Register)
 		auth.POST("/logout", controllers.Logout)
+		auth.POST("/teacher", controllers.SetTeacher)
+		auth.POST("/location", controllers.SetLocation)
+		auth.POST("/rename", controllers.SetUsername)
+		auth.POST("/delete_user", controllers.DeleteUser)
 	}
 	return router
 }

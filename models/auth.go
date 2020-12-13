@@ -25,6 +25,13 @@ type Auths struct {
 	Token    string
 }
 
+type Follows struct {
+	Follower  string `gorm:"primary_key"`
+	Followee  string `gorm:"primary_key"`
+	CreatedAt time.Time
+	DeletedAt time.Time `gorm:"default:null"`
+}
+
 func CreateAuth(auth *Auths) (err error) {
 	err = Db.Create(&auth).Error
 	return
@@ -50,8 +57,18 @@ func DeleteUser(username string) (err error) {
 	return
 }
 
-func UpdateAuth(attribute, value, username string, auth *Auths) (err error) {
-	err = Db.Model(auth).Where(&Auths{Username: username}).Update(attribute, value).Error
+func DeleteAuth(username, password string) (err error) {
+	err = Db.Where(&Auths{Username: username, Password: password}).Delete(&Auths{}).Error
+	return
+}
+
+func UpdateAuth(attribute, value, username string) (err error) {
+	err = Db.Model(Auths{}).Where(&Auths{Username: username}).Update(attribute, value).Error
+	return err
+}
+
+func UpdateUser(attribute, value, username string) (err error) {
+	err = Db.Model(Users{}).Where(&Users{Username: username}).Update(attribute, value).Error
 	return err
 }
 
