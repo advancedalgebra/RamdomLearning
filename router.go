@@ -19,6 +19,8 @@ func InitRouter() *gin.Engine {
 		auth.POST("/location", controllers.SetLocation)
 		auth.POST("/rename", controllers.SetUsername)
 		auth.POST("/delete_user", controllers.DeleteUser)
+		auth.POST("/follow", controllers.Follow)
+		auth.POST("/unfollow", controllers.UnFollow)
 	}
 	return router
 }

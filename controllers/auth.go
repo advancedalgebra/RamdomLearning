@@ -17,6 +17,7 @@ type message struct {
 	Password string
 	Location string
 	NewName  string
+	Follower string
 }
 
 func Login(c *gin.Context) {
@@ -150,6 +151,42 @@ func DeleteUser(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		} else {
 			if err := models.DeleteTransaction(temp.Username); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
+		}
+	}
+}
+
+func Follow(c *gin.Context) {
+	var temp message
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	if utils.CheckToken(c, temp.Username) == "" {
+		if _, err := models.QueryUser(temp.Follower); err != nil || temp.Follower == temp.Username {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong User"})
+		} else {
+			if err := models.FollowTransaction(temp.Username, temp.Follower); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
+		}
+	}
+}
+
+func UnFollow(c *gin.Context) {
+	var temp message
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	if utils.CheckToken(c, temp.Username) == "" {
+		if _, err := models.QueryFollow(temp.Username, temp.Follower); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			if err := models.UnFollowTransaction(temp.Username, temp.Follower); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm"
 	"time"
 )
@@ -10,7 +11,7 @@ type Users struct {
 	Identity    string `gorm:"default:'student'"`
 	Username    string `gorm:"not null"`
 	Follower    uint   `gorm:"default:0"`
-	Followee    uint   `gorm:"default:0"`
+	Following   uint   `gorm:"default:0"`
 	LaunchCount uint   `gorm:"default:0"`
 	LikesCount  uint   `gorm:"default:0"`
 	Location    string
@@ -53,6 +54,15 @@ func QueryUser(username string) (user *Users, err error) {
 func QueryAuth(username, attribute, value string) (auth *Auths, err error) {
 	auth = new(Auths)
 	if err = Db.Where(map[string]interface{}{"username": username, attribute: value}).First(&auth).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
+func QueryFollow(username, follower string) (follow *Follows, err error) {
+	follow = new(Follows)
+	if err = Db.Where(map[string]interface{}{
+		"followee": username, "follower": follower}).First(&follow).Error; err != nil {
 		return nil, err
 	}
 	return
@@ -119,6 +129,47 @@ func DeleteTransaction(username string) error {
 	if errAuth := tx.Where(&Auths{Username: username}).Delete(&Auths{}).Error; errAuth != nil {
 		tx.Rollback()
 		return errAuth
+	}
+	tx.Commit()
+	return nil
+}
+
+func FollowTransaction(username, follower string) error {
+	tx := Db.Begin()
+	if err := tx.Model(Users{}).Where(&Users{Username: username}).Update(
+		"following", gorm.Expr("following + 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	println(follower)
+	if err := tx.Model(Users{}).Where(&Users{Username: follower}).Update(
+		"follower", gorm.Expr("follower + 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Create(&Follows{Follower: follower, Followee: username}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func UnFollowTransaction(username, follower string) error {
+	tx := Db.Begin()
+	if err := tx.Model(Users{}).Where(&Users{Username: username}).Update(
+		"following", gorm.Expr("following - 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(Users{}).Where(&Users{Username: follower}).Update(
+		"follower", gorm.Expr("follower - 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Where(&Follows{Followee: username, Follower: follower}).Delete(&Follows{}).Error; err != nil {
+		tx.Rollback()
+		return err
 	}
 	tx.Commit()
 	return nil
