@@ -10,7 +10,7 @@ func InitRouter() *gin.Engine {
 	router := gin.Default()
 	// 解决跨域问题
 	router.Use(cors())
-	auth := router.Group("/auth")
+	auth := router.Group("/user")
 	{
 		auth.POST("/login", controllers.Login)
 		auth.POST("/register", controllers.Register)
@@ -21,6 +21,8 @@ func InitRouter() *gin.Engine {
 		auth.POST("/delete_user", controllers.DeleteUser)
 		auth.POST("/follow", controllers.Follow)
 		auth.POST("/unfollow", controllers.UnFollow)
+		auth.GET("/find_follower", controllers.FindFollower)
+		auth.GET("/find_following", controllers.FindFollowing)
 	}
 	return router
 }

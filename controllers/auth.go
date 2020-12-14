@@ -183,7 +183,7 @@ func UnFollow(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 	if utils.CheckToken(c, temp.Username) == "" {
-		if _, err := models.QueryFollow(temp.Username, temp.Follower); err != nil {
+		if _, err := models.QueryFollowItem(temp.Username, temp.Follower); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		} else {
 			if err := models.UnFollowTransaction(temp.Username, temp.Follower); err != nil {
@@ -192,5 +192,29 @@ func UnFollow(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}
 		}
+	}
+}
+
+func FindFollower(c *gin.Context) {
+	if result, err := models.QueryFollower(c.Query("username")); err != nil || len(result) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+	} else {
+		var FolloweeSLice []string
+		for _, v := range result {
+			FolloweeSLice = append(FolloweeSLice, v.Followee)
+		}
+		c.JSON(http.StatusOK, FolloweeSLice)
+	}
+}
+
+func FindFollowing(c *gin.Context) {
+	if result, err := models.QueryFollowing(c.Query("username")); err != nil || len(result) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+	} else {
+		var FollowingSLice []string
+		for _, v := range result {
+			FollowingSLice = append(FollowingSLice, v.Follower)
+		}
+		c.JSON(http.StatusOK, FollowingSLice)
 	}
 }

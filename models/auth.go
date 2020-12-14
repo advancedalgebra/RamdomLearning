@@ -27,8 +27,9 @@ type Auths struct {
 }
 
 type Follows struct {
-	Follower  string `gorm:"primary_key"`
-	Followee  string `gorm:"primary_key"`
+	FollowId  uint `gorm:"primary_key;auto-increment"`
+	Follower  string
+	Followee  string
 	CreatedAt time.Time
 	DeletedAt *time.Time `gorm:"default:null"`
 }
@@ -59,10 +60,24 @@ func QueryAuth(username, attribute, value string) (auth *Auths, err error) {
 	return
 }
 
-func QueryFollow(username, follower string) (follow *Follows, err error) {
+func QueryFollowItem(username, follower string) (follow *Follows, err error) {
 	follow = new(Follows)
 	if err = Db.Where(map[string]interface{}{
 		"followee": username, "follower": follower}).First(&follow).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
+func QueryFollower(username string) (followerList []*Follows, err error) {
+	if err = Db.Select("followee").Where(&Follows{Follower: username}).Find(&followerList).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
+func QueryFollowing(username string) (followerList []*Follows, err error) {
+	if err = Db.Select("follower").Where(&Follows{Followee: username}).Find(&followerList).Error; err != nil {
 		return nil, err
 	}
 	return
@@ -141,7 +156,6 @@ func FollowTransaction(username, follower string) error {
 		tx.Rollback()
 		return err
 	}
-	println(follower)
 	if err := tx.Model(Users{}).Where(&Users{Username: follower}).Update(
 		"follower", gorm.Expr("follower + 1")).Error; err != nil {
 		tx.Rollback()
