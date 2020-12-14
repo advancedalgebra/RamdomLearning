@@ -24,8 +24,7 @@ func Login(c *gin.Context) {
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
-		var result models.Auths
-		if err := models.QueryAuth(temp.Username, "password", temp.Password, &result); err != nil {
+		if _, err := models.QueryAuth(temp.Username, "password", temp.Password); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		} else {
 			h := md5.New()
@@ -45,13 +44,10 @@ func Register(c *gin.Context) {
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	var result models.Users
-	if err := models.QueryUser(temp.Username, &result); err != nil {
+	if _, err := models.QueryUser(temp.Username); err != nil {
 		user := models.Users{Username: temp.Username}
-		err = models.CreateUser(&user)
 		auth := models.Auths{Username: temp.Username, UserId: user.UserId, Password: temp.Password}
-		errAuth := models.CreateAuth(&auth)
-		if err != nil || errAuth != nil {
+		if err := models.Commit(&user, &auth); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(http.StatusOK, user)
@@ -103,17 +99,38 @@ func SetLocation(c *gin.Context) {
 	}
 }
 
+//func SetUsername(c *gin.Context) {
+//	var temp message
+//	if err := c.ShouldBind(&temp); err != nil {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//	}
+//	if utils.CheckToken(c, temp.Username) == "" {
+//		if user, err := models.QueryUser(temp.NewName); err != nil {
+//			if user, err =models.QueryUser(temp.Username); err != nil {
+//				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//			} else {
+//				user.Username = temp.NewName
+//				auth := models.Auths{Username: temp.NewName, UserId: user.UserId}
+//				if err := models.Commit(&user, &auth); err != nil {
+//					c.JSON(http.StatusBadRequest, gin.H{"error": "RollBack! Try again!"})
+//				} else {
+//					c.JSON(http.StatusOK, gin.H{"message": "success"})
+//				}
+//			}
+//		} else {
+//			c.JSON(http.StatusForbidden, gin.H{"error": "Username already exist"})
+//		}
+//	}
+//}
+
 func SetUsername(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	var result models.Users
 	if utils.CheckToken(c, temp.Username) == "" {
-		if models.QueryUser(temp.NewName, &result) != nil {
-			err := models.UpdateUser("username", temp.NewName, temp.Username)
-			errAuth := models.UpdateAuth("username", temp.NewName, temp.Username)
-			if err != nil || errAuth != nil {
+		if _, err := models.QueryUser(temp.NewName); err != nil {
+			if err := models.UpdateTransaction(temp.Username, temp.NewName); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
@@ -129,14 +146,11 @@ func DeleteUser(c *gin.Context) {
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
-		var result models.Auths
-		if err := models.QueryAuth(temp.Username, "password", temp.Password, &result); err != nil {
+		if _, err := models.QueryAuth(temp.Username, "password", temp.Password); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		} else {
-			errUser := models.DeleteUser(temp.Username)
-			err = models.DeleteAuth(temp.Username, temp.Password)
-			if err != nil || errUser != nil {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			if err := models.DeleteTransaction(temp.Username); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}

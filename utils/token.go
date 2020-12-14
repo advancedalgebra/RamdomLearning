@@ -7,9 +7,8 @@ import (
 )
 
 func CheckToken(c *gin.Context, username string) (err string) {
-	var result models.Auths
 	if token := c.GetHeader("token"); token != "" {
-		if err := models.QueryAuth(username, "token", token, &result); err != nil {
+		if _, err := models.QueryAuth(username, "token", token); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong Token"})
 			return "wrong"
 		} else {

@@ -15,11 +15,11 @@ type Users struct {
 	LikesCount  uint   `gorm:"default:0"`
 	Location    string
 	CreatedAt   time.Time
-	DeletedAt   time.Time `gorm:"default:null"`
+	DeletedAt   *time.Time `gorm:"default:null"`
 }
 
 type Auths struct {
-	UserId   uint `gorm:"ForeignKey:UserId"`
+	UserId   uint `gorm:"ForeignKey:UserId;primary_key"`
 	Username string
 	Password string
 	Token    string
@@ -29,38 +29,49 @@ type Follows struct {
 	Follower  string `gorm:"primary_key"`
 	Followee  string `gorm:"primary_key"`
 	CreatedAt time.Time
-	DeletedAt time.Time `gorm:"default:null"`
+	DeletedAt *time.Time `gorm:"default:null"`
 }
 
-func CreateAuth(auth *Auths) (err error) {
-	err = Db.Create(&auth).Error
+//func CreateAuth(auth *Auths) (err error) {
+//	err = Db.Create(&auth).Error
+//	return
+//}
+//
+//func CreateUser(user *Users) (err error) {
+//	err = Db.Create(&user).Error
+//	return
+//}
+
+func QueryUser(username string) (user *Users, err error) {
+	user = new(Users)
+	if err = Db.Where(&Users{Username: username}).First(&user).Error; err != nil {
+		return nil, err
+	}
 	return
 }
 
-func CreateUser(user *Users) (err error) {
-	err = Db.Create(&user).Error
+func QueryAuth(username, attribute, value string) (auth *Auths, err error) {
+	auth = new(Auths)
+	if err = Db.Where(map[string]interface{}{"username": username, attribute: value}).First(&auth).Error; err != nil {
+		return nil, err
+	}
 	return
 }
 
-func QueryUser(username string, user *Users) (err error) {
-	err = Db.Where(&Users{Username: username}).First(&user).Error
-	return
-}
+//func QueryAuthById(id uint, auth *Auths) (err error) {
+//	err = Db.Where(map[string]interface{}{"user_id": id}).First(&auth).Error
+//	return
+//}
 
-func QueryAuth(username, attribute, value string, auth *Auths) (err error) {
-	err = Db.Where(map[string]interface{}{"username": username, attribute: value}).First(&auth).Error
-	return
-}
-
-func DeleteUser(username string) (err error) {
-	err = Db.Where(&Users{Username: username}).Delete(&Users{}).Error
-	return
-}
-
-func DeleteAuth(username, password string) (err error) {
-	err = Db.Where(&Auths{Username: username, Password: password}).Delete(&Auths{}).Error
-	return
-}
+//func DeleteUser(username string, db *gorm.DB) (err error) {
+//	err = db.Where(&Users{Username: username}).Delete(&Users{}).Error
+//	return
+//}
+//
+//func DeleteAuth(username, password string, db *gorm.DB) (err error) {
+//	err = db.Where(&Auths{Username: username, Password: password}).Delete(&Auths{}).Error
+//	return
+//}
 
 func UpdateAuth(attribute, value, username string) (err error) {
 	err = Db.Model(Auths{}).Where(&Auths{Username: username}).Update(attribute, value).Error
@@ -72,8 +83,43 @@ func UpdateUser(attribute, value, username string) (err error) {
 	return err
 }
 
-//func (token *Token) Query() bool{
-//	var user Auth
-//	err := db.Where("token = ?",token.Token).First(&user).Error
-//	return gorm.IsRecordNotFoundError(err)
-//}
+func Commit(args ...interface{}) error {
+	tx := Db.Begin()
+	for _, v := range args {
+		if err := tx.Create(v).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func UpdateTransaction(username, NewName string) error {
+	tx := Db.Begin()
+	if err := tx.Model(Auths{}).Where(&Auths{Username: username}).Update("username", NewName).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if errAuth := tx.Model(Users{}).Where(&Users{Username: username}).Update(
+		"username", NewName).Error; errAuth != nil {
+		tx.Rollback()
+		return errAuth
+	}
+	tx.Commit()
+	return nil
+}
+
+func DeleteTransaction(username string) error {
+	tx := Db.Begin()
+	if err := tx.Where(&Users{Username: username}).Delete(&Users{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if errAuth := tx.Where(&Auths{Username: username}).Delete(&Auths{}).Error; errAuth != nil {
+		tx.Rollback()
+		return errAuth
+	}
+	tx.Commit()
+	return nil
+}
