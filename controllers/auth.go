@@ -44,17 +44,18 @@ func Register(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	if _, err := models.QueryUser(temp.Username); err != nil {
-		user := models.Users{Username: temp.Username}
-		auth := models.Auths{Username: temp.Username, UserId: user.UserId, Password: temp.Password}
-		if err := models.Commit(&user, &auth); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		} else {
-			c.JSON(http.StatusOK, user)
-		}
 	} else {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Username already exist"})
+		if _, err := models.QueryUser(temp.Username); err != nil {
+			user := models.Users{Username: temp.Username}
+			auth := models.Auths{Username: temp.Username, UserId: user.UserId, Password: temp.Password}
+			if err := models.Commit(&user, &auth); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, user)
+			}
+		} else {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Username already exist"})
+		}
 	}
 }
 
@@ -62,12 +63,13 @@ func Logout(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	if utils.CheckToken(c, temp.Username) == "" {
-		if err := models.UpdateAuth("token", "", temp.Username); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		} else {
-			c.JSON(http.StatusOK, gin.H{"message": "success"})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if err := models.UpdateAuth("token", "", temp.Username); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
 		}
 	}
 }
@@ -76,12 +78,13 @@ func SetTeacher(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	if utils.CheckToken(c, temp.Username) == "" {
-		if err := models.UpdateUser("identity", "teacher", temp.Username); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		} else {
-			c.JSON(http.StatusOK, gin.H{"message": "success"})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if err := models.UpdateUser("identity", "teacher", temp.Username); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
 		}
 	}
 }
@@ -90,12 +93,13 @@ func SetLocation(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	if utils.CheckToken(c, temp.Username) == "" {
-		if err := models.UpdateUser("location", temp.Location, temp.Username); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		} else {
-			c.JSON(http.StatusOK, gin.H{"message": "success"})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if err := models.UpdateUser("location", temp.Location, temp.Username); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
 		}
 	}
 }
@@ -128,16 +132,17 @@ func SetUsername(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	if utils.CheckToken(c, temp.Username) == "" {
-		if _, err := models.QueryUser(temp.NewName); err != nil {
-			if err := models.UpdateTransaction(temp.Username, temp.NewName); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if _, err := models.QueryUser(temp.NewName); err != nil {
+				if err := models.UpdateTransaction(temp.Username, temp.NewName); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, gin.H{"message": "success"})
+				}
 			} else {
-				c.JSON(http.StatusOK, gin.H{"message": "success"})
+				c.JSON(http.StatusForbidden, gin.H{"error": "Username already exist"})
 			}
-		} else {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Username already exist"})
 		}
 	}
 }
@@ -163,15 +168,16 @@ func Follow(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	if utils.CheckToken(c, temp.Username) == "" {
-		if _, err := models.QueryUser(temp.Follower); err != nil || temp.Follower == temp.Username {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong User"})
-		} else {
-			if err := models.FollowTransaction(temp.Username, temp.Follower); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if _, err := models.QueryUser(temp.Follower); err != nil || temp.Follower == temp.Username {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong User"})
 			} else {
-				c.JSON(http.StatusOK, gin.H{"message": "success"})
+				if err := models.FollowTransaction(temp.Username, temp.Follower); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, gin.H{"message": "success"})
+				}
 			}
 		}
 	}
@@ -181,15 +187,16 @@ func UnFollow(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	if utils.CheckToken(c, temp.Username) == "" {
-		if _, err := models.QueryFollowItem(temp.Username, temp.Follower); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		} else {
-			if err := models.UnFollowTransaction(temp.Username, temp.Follower); err != nil {
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if _, err := models.QueryFollowItem(temp.Username, temp.Follower); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				c.JSON(http.StatusOK, gin.H{"message": "success"})
+				if err := models.UnFollowTransaction(temp.Username, temp.Follower); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, gin.H{"message": "success"})
+				}
 			}
 		}
 	}

@@ -16,5 +16,5 @@ func init() {
 		log.Println(err)
 	}
 	Db.SingularTable(true)
-	Db.AutoMigrate(&Auths{}, &Users{}, &Follows{})
+	Db.AutoMigrate(&Auths{}, &Users{}, &Follows{}, &Videos{})
 }

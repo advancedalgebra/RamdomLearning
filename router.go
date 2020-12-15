@@ -24,6 +24,13 @@ func InitRouter() *gin.Engine {
 		auth.GET("/find_follower", controllers.FindFollower)
 		auth.GET("/find_following", controllers.FindFollowing)
 	}
+	video := router.Group("/video")
+	{
+		video.POST("/launch", controllers.LaunchVideo)
+		video.POST("/like", controllers.LikeVideo)
+		video.POST("/forward", controllers.ForwardVideo)
+		video.POST("/view", controllers.ViewVideo)
+	}
 	return router
 }
 
