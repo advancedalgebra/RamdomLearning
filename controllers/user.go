@@ -18,6 +18,7 @@ type message struct {
 	Location string
 	NewName  string
 	Follower string
+	//UserId	 uint
 }
 
 func Login(c *gin.Context) {

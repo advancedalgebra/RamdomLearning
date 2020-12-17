@@ -9,7 +9,7 @@ import (
 type Users struct {
 	UserId      uint   `gorm:"primary_key;auto-increment"`
 	Identity    string `gorm:"default:'student'"`
-	Username    string `gorm:"not null"`
+	Username    string `gorm:"not null;unique"`
 	Follower    uint   `gorm:"default:0"`
 	Following   uint   `gorm:"default:0"`
 	LaunchCount uint   `gorm:"default:0"`
@@ -20,16 +20,16 @@ type Users struct {
 }
 
 type Auths struct {
-	UserId   uint `gorm:"ForeignKey:UserId;primary_key"`
-	Username string
+	UserId   uint   `gorm:"ForeignKey:UserId;primary_key"`
+	Username string `gorm:"ForeignKey:Username"`
 	Password string
 	Token    string
 }
 
 type Follows struct {
-	FollowId  uint `gorm:"primary_key;auto-increment"`
-	Follower  string
-	Followee  string
+	FollowId  uint   `gorm:"primary_key;auto-increment"`
+	Follower  string `gorm:"ForeignKey:Username"`
+	Followee  string `gorm:"ForeignKey:Username"`
 	CreatedAt time.Time
 	DeletedAt *time.Time `gorm:"default:null"`
 }
@@ -120,18 +120,25 @@ func Commit(args ...interface{}) error {
 	return nil
 }
 
+//func UpdateTransaction(username, NewName string) error {
+//	tx := Db.Begin()
+//	if err := tx.Model(Auths{}).Where(&Auths{Username: username}).Update("username", NewName).Error; err != nil {
+//		tx.Rollback()
+//		return err
+//	}
+//	if errAuth := tx.Model(Users{}).Where(&Users{Username: username}).Update(
+//		"username", NewName).Error; errAuth != nil {
+//		tx.Rollback()
+//		return errAuth
+//	}
+//	tx.Commit()
+//	return nil
+//}
+
 func UpdateTransaction(username, NewName string) error {
-	tx := Db.Begin()
-	if err := tx.Model(Auths{}).Where(&Auths{Username: username}).Update("username", NewName).Error; err != nil {
-		tx.Rollback()
+	if err := Db.Model(Users{}).Where(&Users{Username: username}).Update("username", NewName).Error; err != nil {
 		return err
 	}
-	if errAuth := tx.Model(Users{}).Where(&Users{Username: username}).Update(
-		"username", NewName).Error; errAuth != nil {
-		tx.Rollback()
-		return errAuth
-	}
-	tx.Commit()
 	return nil
 }
 
@@ -145,9 +152,62 @@ func DeleteTransaction(username string) error {
 		tx.Rollback()
 		return errAuth
 	}
+	if err := tx.Where(&Follows{Follower: username}).Delete(&Follows{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Where(&Follows{Followee: username}).Delete(&Follows{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	//if err := tx.Where(&Favorites{UserId: id}).Delete(&Favorites{}).Error; err != nil {
+	//	tx.Rollback()
+	//	return err
+	//}
+	//if err := tx.Where(&Videos{Owner: username}).Delete(&Videos{}).Error; err != nil {
+	//	tx.Rollback()
+	//	return err
+	//}
 	tx.Commit()
 	return nil
 }
+
+//func DeleteTransaction(username string, id uint) error {
+//	tx := Db.Begin()
+//	if err := tx.Where(&Users{Username: username}).Delete(&Users{}).Error; err != nil {
+//		tx.Rollback()
+//		return err
+//	}
+//	if errAuth := tx.Where(&Auths{Username: username}).Delete(&Auths{}).Error; errAuth != nil {
+//		tx.Rollback()
+//		return errAuth
+//	}
+//	if err := tx.Where(&Follows{Follower: username}).Delete(&Follows{}).Error; err != nil {
+//		tx.Rollback()
+//		return err
+//	}
+//	if err := tx.Where(&Follows{Followee: username}).Delete(&Follows{}).Error; err != nil {
+//		tx.Rollback()
+//		return err
+//	}
+//	if err := tx.Where(&Favorites{UserId: id}).Delete(&Favorites{}).Error; err != nil {
+//		tx.Rollback()
+//		return err
+//	}
+//	if err := tx.Where(&Videos{Owner: username}).Delete(&Videos{}).Error; err != nil {
+//		tx.Rollback()
+//		return err
+//	}
+//	tx.Commit()
+//	return nil
+//}
+
+//func DeleteTransaction(username string) error {
+//	if err := Db.Where(&Users{Username: username}).Delete(&Users{}).Error; err != nil {
+//		return err
+//	}
+//	return nil
+//}
 
 func FollowTransaction(username, follower string) error {
 	tx := Db.Begin()

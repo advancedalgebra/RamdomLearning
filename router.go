@@ -30,6 +30,16 @@ func InitRouter() *gin.Engine {
 		video.POST("/like", controllers.LikeVideo)
 		video.POST("/forward", controllers.ForwardVideo)
 		video.POST("/view", controllers.ViewVideo)
+		video.POST("/unlaunch", controllers.UnLaunchVideo)
+		video.POST("/dislike", controllers.DisLikeVideo)
+		video.GET("/find_video_by_owner", controllers.FindVideosByOwner)
+		video.GET("/find_video_by_category", controllers.FindByCategory)
+	}
+	UserBehavior := router.Group("/behavior")
+	{
+		UserBehavior.POST("/favorite_video", controllers.FavoriteVideo)
+		UserBehavior.POST("/disfavorite_video", controllers.DisFavoriteVideo)
+		UserBehavior.GET("/find_favorite", controllers.FindFavoritesByUserId)
 	}
 	return router
 }
