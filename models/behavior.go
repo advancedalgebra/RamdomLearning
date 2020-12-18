@@ -15,10 +15,10 @@ type Favorites struct {
 
 func FavoriteTransaction(id uint, favorites *Favorites) error {
 	tx := Db.Begin()
-	var video Videos
-	if err := tx.Where(&Videos{VideoId: id}).First(&video).Error; err != nil {
-		return err
-	}
+	//var video Videos
+	//if err := tx.Where(&Videos{VideoId: id}).First(&video).Error; err != nil {
+	//	return err
+	//}
 	if err := tx.Model(Favorites{}).Create(&favorites).Error; err != nil {
 		tx.Rollback()
 		return err
@@ -34,10 +34,10 @@ func FavoriteTransaction(id uint, favorites *Favorites) error {
 
 func DisFavoriteTransaction(id, uid uint) error {
 	tx := Db.Begin()
-	var favorites Favorites
-	if err := tx.Where(&Favorites{VideoId: id}).First(&favorites).Error; err != nil {
-		return err
-	}
+	//var favorites Favorites
+	//if err := tx.Where(&Favorites{VideoId: id}).First(&favorites).Error; err != nil {
+	//	return err
+	//}
 	if err := tx.Where(&Favorites{VideoId: id, UserId: uid}).Delete(&Favorites{}).Error; err != nil {
 		tx.Rollback()
 		return err

@@ -69,10 +69,10 @@ func LaunchTransaction(username string, video *Videos, categories *Categories) e
 
 func UnLaunchTransaction(username string, id, count uint) error {
 	tx := Db.Begin()
-	var video Videos
-	if err := tx.Where(&Videos{VideoId: id}).First(&video).Error; err != nil {
-		return err
-	}
+	//var video Videos
+	//if err := tx.Where(&Videos{VideoId: id}).First(&video).Error; err != nil {
+	//	return err
+	//}
 	if err := tx.Where(&Videos{VideoId: id}).Delete(&Videos{}).Error; err != nil {
 		tx.Rollback()
 		return err
@@ -102,6 +102,7 @@ func UnLaunchTransaction(username string, id, count uint) error {
 func LikeTransaction(id uint) error {
 	tx := Db.Begin()
 	var video Videos
+	// 查出视频的作者
 	if err := tx.Where(&Videos{VideoId: id}).First(&video).Error; err != nil {
 		return err
 	}

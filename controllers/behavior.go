@@ -20,8 +20,9 @@ func FavoriteVideo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
+			// 为了获得视频的路径
 			if path, err := models.QueryPath(temp.VideoId); err != nil {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong Video"})
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			} else {
 				video := models.Favorites{UserId: temp.UserId, Path: path.Path, VideoId: temp.VideoId}
 				if err := models.FavoriteTransaction(temp.VideoId, &video); err != nil {

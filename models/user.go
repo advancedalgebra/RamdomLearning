@@ -60,14 +60,14 @@ func QueryAuth(username, attribute, value string) (auth *Auths, err error) {
 	return
 }
 
-func QueryFollowItem(username, follower string) (follow *Follows, err error) {
-	follow = new(Follows)
-	if err = Db.Where(map[string]interface{}{
-		"followee": username, "follower": follower}).First(&follow).Error; err != nil {
-		return nil, err
-	}
-	return
-}
+//func QueryFollowItem(username, follower string) (follow *Follows, err error) {
+//	follow = new(Follows)
+//	if err = Db.Where(map[string]interface{}{
+//		"followee": username, "follower": follower}).First(&follow).Error; err != nil {
+//		return nil, err
+//	}
+//	return
+//}
 
 func QueryFollower(username string) (followerList []*Follows, err error) {
 	if err = Db.Select("followee").Where(&Follows{Follower: username}).Find(&followerList).Error; err != nil {

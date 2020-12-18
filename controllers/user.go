@@ -26,6 +26,7 @@ func Login(c *gin.Context) {
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
+		// 检查用户名密码是否正确
 		if _, err := models.QueryAuth(temp.Username, "password", temp.Password); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		} else {
@@ -46,6 +47,7 @@ func Register(c *gin.Context) {
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
+		// 检查用户名是否重复
 		if _, err := models.QueryUser(temp.Username); err != nil {
 			user := models.Users{Username: temp.Username}
 			auth := models.Auths{Username: temp.Username, UserId: user.UserId, Password: temp.Password}
@@ -135,6 +137,7 @@ func SetUsername(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
+			// 检查用户名是否存在
 			if _, err := models.QueryUser(temp.NewName); err != nil {
 				if err := models.UpdateTransaction(temp.Username, temp.NewName); err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -153,6 +156,7 @@ func DeleteUser(c *gin.Context) {
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
+		// 检查用户名密码是否正确
 		if _, err := models.QueryAuth(temp.Username, "password", temp.Password); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		} else {
@@ -165,24 +169,58 @@ func DeleteUser(c *gin.Context) {
 	}
 }
 
+//func Follow(c *gin.Context) {
+//	var temp message
+//	if err := c.ShouldBind(&temp); err != nil {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//	} else {
+//		if utils.CheckToken(c, temp.Username) == "" {
+//			if _, err := models.QueryUser(temp.Follower); err != nil || temp.Follower == temp.Username {
+//				c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong User"})
+//			} else {
+//				if err := models.FollowTransaction(temp.Username, temp.Follower); err != nil {
+//					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//				} else {
+//					c.JSON(http.StatusOK, gin.H{"message": "success"})
+//				}
+//			}
+//		}
+//	}
+//}
+
 func Follow(c *gin.Context) {
 	var temp message
 	if err := c.ShouldBind(&temp); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
-			if _, err := models.QueryUser(temp.Follower); err != nil || temp.Follower == temp.Username {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong User"})
+			if err := models.FollowTransaction(temp.Username, temp.Follower); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				if err := models.FollowTransaction(temp.Username, temp.Follower); err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				} else {
-					c.JSON(http.StatusOK, gin.H{"message": "success"})
-				}
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}
 		}
 	}
 }
+
+//func UnFollow(c *gin.Context) {
+//	var temp message
+//	if err := c.ShouldBind(&temp); err != nil {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//	} else {
+//		if utils.CheckToken(c, temp.Username) == "" {
+//			if _, err := models.QueryFollowItem(temp.Username, temp.Follower); err != nil {
+//				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//			} else {
+//				if err := models.UnFollowTransaction(temp.Username, temp.Follower); err != nil {
+//					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//				} else {
+//					c.JSON(http.StatusOK, gin.H{"message": "success"})
+//				}
+//			}
+//		}
+//	}
+//}
 
 func UnFollow(c *gin.Context) {
 	var temp message
@@ -190,14 +228,10 @@ func UnFollow(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
-			if _, err := models.QueryFollowItem(temp.Username, temp.Follower); err != nil {
+			if err := models.UnFollowTransaction(temp.Username, temp.Follower); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				if err := models.UnFollowTransaction(temp.Username, temp.Follower); err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				} else {
-					c.JSON(http.StatusOK, gin.H{"message": "success"})
-				}
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}
 		}
 	}
