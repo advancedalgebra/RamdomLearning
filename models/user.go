@@ -44,11 +44,12 @@ type Follows struct {
 //	return
 //}
 
-func QueryUser(username string) (user *Users, err error) {
+func QueryUserAll(username string) (user *Users, err error) {
 	user = new(Users)
-	if err = Db.Where(&Users{Username: username}).First(&user).Error; err != nil {
+	if err = Db.Unscoped().Where(&Users{Username: username}).First(&user).Error; err != nil {
 		return nil, err
 	}
+	//print(user.Username)
 	return
 }
 
@@ -142,7 +143,7 @@ func UpdateTransaction(username, NewName string) error {
 	return nil
 }
 
-func DeleteTransaction(username string) error {
+func DeleteTransaction(username string, id uint) error {
 	tx := Db.Begin()
 	if err := tx.Where(&Users{Username: username}).Delete(&Users{}).Error; err != nil {
 		tx.Rollback()
@@ -152,6 +153,27 @@ func DeleteTransaction(username string) error {
 		tx.Rollback()
 		return errAuth
 	}
+	var followerList []*Follows
+	if err := Db.Select("followee").Where(&Follows{Follower: username}).Find(&followerList).Error; err != nil {
+		return err
+	}
+	for _, v := range followerList {
+		if err := tx.Model(Users{}).Where(&Users{Username: v.Followee}).Update(
+			"following", gorm.Expr("following - 1")).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	if err := Db.Select("follower").Where(&Follows{Followee: username}).Find(&followerList).Error; err != nil {
+		return err
+	}
+	for _, v := range followerList {
+		if err := tx.Model(Users{}).Where(&Users{Username: v.Follower}).Update(
+			"follower", gorm.Expr("follower - 1")).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
 	if err := tx.Where(&Follows{Follower: username}).Delete(&Follows{}).Error; err != nil {
 		tx.Rollback()
 		return err
@@ -160,14 +182,30 @@ func DeleteTransaction(username string) error {
 		tx.Rollback()
 		return err
 	}
-	//if err := tx.Where(&Favorites{UserId: id}).Delete(&Favorites{}).Error; err != nil {
-	//	tx.Rollback()
-	//	return err
-	//}
-	//if err := tx.Where(&Videos{Owner: username}).Delete(&Videos{}).Error; err != nil {
-	//	tx.Rollback()
-	//	return err
-	//}
+	if err := tx.Where(&Favorites{UserId: id}).Delete(&Favorites{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	var VideoList []*Videos
+	if err := tx.Select("video_id").Where(&Videos{Owner: username}).Find(&VideoList).Error; err != nil {
+		return err
+	}
+	for _, v := range VideoList {
+		//println(v.VideoId)
+		if err := tx.Where(&Favorites{VideoId: v.VideoId}).Delete(&Favorites{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		if err := tx.Where(&Categories{VideoId: v.VideoId}).Delete(&Categories{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	if err := tx.Where(&Videos{Owner: username}).Delete(&Videos{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	//tx.Rollback()
 	tx.Commit()
 	return nil
 }

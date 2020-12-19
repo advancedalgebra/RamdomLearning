@@ -29,7 +29,7 @@ func InitRouter() *gin.Engine {
 		video.POST("/launch", controllers.LaunchVideo)
 		video.POST("/like", controllers.LikeVideo)
 		video.POST("/forward", controllers.ForwardVideo)
-		video.POST("/view", controllers.ViewVideo)
+		video.GET("/view", controllers.ViewVideo)
 		video.POST("/unlaunch", controllers.UnLaunchVideo)
 		video.POST("/dislike", controllers.DisLikeVideo)
 		video.GET("/find_video_by_owner", controllers.FindVideosByOwner)

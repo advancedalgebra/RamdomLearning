@@ -18,7 +18,7 @@ type message struct {
 	Location string
 	NewName  string
 	Follower string
-	//UserId	 uint
+	UserId   uint
 }
 
 func Login(c *gin.Context) {
@@ -48,7 +48,7 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		// 检查用户名是否重复
-		if _, err := models.QueryUser(temp.Username); err != nil {
+		if _, err := models.QueryUserAll(temp.Username); err != nil {
 			user := models.Users{Username: temp.Username}
 			auth := models.Auths{Username: temp.Username, UserId: user.UserId, Password: temp.Password}
 			if err := models.Commit(&user, &auth); err != nil {
@@ -138,7 +138,7 @@ func SetUsername(c *gin.Context) {
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			// 检查用户名是否存在
-			if _, err := models.QueryUser(temp.NewName); err != nil {
+			if _, err := models.QueryUserAll(temp.NewName); err != nil {
 				if err := models.UpdateTransaction(temp.Username, temp.NewName); err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				} else {
@@ -160,7 +160,7 @@ func DeleteUser(c *gin.Context) {
 		if _, err := models.QueryAuth(temp.Username, "password", temp.Password); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		} else {
-			if err := models.DeleteTransaction(temp.Username); err != nil {
+			if err := models.DeleteTransaction(temp.Username, temp.UserId); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
@@ -169,6 +169,7 @@ func DeleteUser(c *gin.Context) {
 	}
 }
 
+//之后要检查不能关注自己的检查（username和follower不能重复）
 //func Follow(c *gin.Context) {
 //	var temp message
 //	if err := c.ShouldBind(&temp); err != nil {
