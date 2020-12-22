@@ -140,7 +140,7 @@ func DisLikeTransaction(id uint) error {
 	return nil
 }
 
-func QueryByCategory(category string) (videoList []*Videos, err error) {
+func QueryByCategory(category string) (videoList []*Categories, err error) {
 	if err = Db.Select("path").Where(&Categories{Category: category}).Find(&videoList).Error; err != nil {
 		return nil, err
 	}
