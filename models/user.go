@@ -209,6 +209,25 @@ func DeleteTransaction(username string, id uint) error {
 		tx.Rollback()
 		return err
 	}
+	var CommentList []*Comments
+	if err := Db.Where(&Comments{Commenter: username, Type: "video"}).Find(&CommentList).Error; err != nil {
+		return err
+	}
+	for _, v := range CommentList {
+		if err := DeleteCommentVideo(v.Origin, v.CommentId, v.Count); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	if err := Db.Where(&Comments{Commenter: username, Type: "comment"}).Find(&CommentList).Error; err != nil {
+		return err
+	}
+	for _, v := range CommentList {
+		if err := DeleteComment(v.Count, v.CommentId, v.Origin); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
 	//tx.Rollback()
 	tx.Commit()
 	return nil

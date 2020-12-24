@@ -14,6 +14,7 @@ type Videos struct {
 	Favorites uint   `gorm:"default:0"`
 	Path      string `gorm:"not null;unique"`
 	View      uint   `gorm:"default:0"`
+	Comments  uint   `gorm:"default:0"`
 	Forward   uint   `gorm:"default:0"`
 	Size      uint   `gorm:"default:0"`
 	Duration  time.Duration

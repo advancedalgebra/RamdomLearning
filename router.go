@@ -44,6 +44,10 @@ func InitRouter() *gin.Engine {
 		UserBehavior.POST("/find_history", controllers.FindHistory)
 		UserBehavior.POST("/delete_one", controllers.DeleteOneHistory)
 		UserBehavior.POST("/delete_range", controllers.DeleteRangeHistory)
+		UserBehavior.POST("/comment", controllers.LaunchComment)
+		UserBehavior.POST("/like", controllers.LikeComment)
+		UserBehavior.POST("/delete_comment", controllers.DeleteComment)
+		UserBehavior.POST("/dislike", controllers.DisLikeComment)
 		UserBehavior.GET("/find_favorite", controllers.FindFavoritesByUserId)
 	}
 	return router

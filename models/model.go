@@ -16,7 +16,7 @@ func init() {
 		log.Println(err)
 	}
 	Db.SingularTable(true)
-	Db.AutoMigrate(&Users{}, &Auths{}, &Follows{}, &Videos{}, &Favorites{}, &Categories{}, &Histories{})
+	Db.AutoMigrate(&Users{}, &Auths{}, &Follows{}, &Videos{}, &Favorites{}, &Categories{}, &Histories{}, &Comments{})
 	Db.Model(&Auths{}).AddForeignKey("username", "users(username)", "CASCADE", "CASCADE")
 	Db.Model(&Follows{}).AddForeignKey("follower", "users(username)", "CASCADE", "CASCADE")
 	Db.Model(&Follows{}).AddForeignKey("followee", "users(username)", "CASCADE", "CASCADE")

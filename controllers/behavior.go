@@ -16,6 +16,22 @@ type info struct {
 	HisList   []uint
 }
 
+type mess struct {
+	VideoId   uint
+	CommentId uint
+	Username  string
+	Type      string
+	Count     uint
+}
+
+type comDetail struct {
+	Commenter string
+	Content   string
+	Type      string
+	Origin    uint
+	VideoId   uint
+}
+
 func FavoriteVideo(c *gin.Context) {
 	var temp info
 	if err := c.ShouldBind(&temp); err != nil {
@@ -109,6 +125,86 @@ func DeleteRangeHistory(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
+		}
+	}
+}
+
+func LaunchComment(c *gin.Context) {
+	var temp comDetail
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Commenter) == "" {
+			comment := models.Comments{Commenter: temp.Commenter, Content: temp.Content,
+				Type: temp.Type, Origin: temp.Origin}
+			if temp.Type == "comment" {
+				comment.Count = temp.VideoId
+				if err := models.CreateComment(&comment, temp.VideoId); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, comment)
+				}
+			} else {
+				if err := models.CreateCommentVideo(&comment, temp.VideoId); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, comment)
+				}
+			}
+
+		}
+	}
+}
+
+func LikeComment(c *gin.Context) {
+	var temp mess
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if err := models.LikeAComment(temp.CommentId); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
+		}
+	}
+}
+
+func DisLikeComment(c *gin.Context) {
+	var temp mess
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if err := models.DisLikeAComment(temp.CommentId); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
+		}
+	}
+}
+
+func DeleteComment(c *gin.Context) {
+	var temp mess
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if temp.Type == "video" {
+				if err := models.DeleteCommentVideo(temp.VideoId, temp.CommentId, temp.Count); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, gin.H{"message": "success"})
+				}
+			} else {
+				if err := models.DeleteComment(temp.VideoId, temp.CommentId, temp.Count); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, gin.H{"message": "success"})
+				}
 			}
 		}
 	}

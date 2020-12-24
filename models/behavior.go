@@ -24,6 +24,18 @@ type Histories struct {
 	DeletedAt *time.Time `gorm:"default:null"`
 }
 
+type Comments struct {
+	CommentId uint `gorm:"primary_key;auto-increment"`
+	Commenter string
+	Likes     uint
+	Content   string
+	Type      string
+	Origin    uint
+	Count     uint
+	UpdatedAt time.Time
+	DeletedAt *time.Time `gorm:"default:null"`
+}
+
 func FavoriteTransaction(id uint, favorites *Favorites) error {
 	tx := Db.Begin()
 	//var video Videos
@@ -92,4 +104,94 @@ func DeleteOne(id uint) (err error) {
 func DeleteRange(histList []uint) (err error) {
 	err = Db.Where("his_id in (?)", histList).Delete(&Histories{}).Error
 	return
+}
+
+func CreateCommentVideo(comments *Comments, id uint) (err error) {
+	tx := Db.Begin()
+	if err := tx.Create(&comments).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(Videos{}).Where(&Videos{VideoId: id}).Update(
+		"comments", gorm.Expr("comments + 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func CreateComment(comments *Comments, id uint) (err error) {
+	tx := Db.Begin()
+	if err := tx.Create(&comments).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(Videos{}).Where(&Videos{VideoId: id}).Update(
+		"comments", gorm.Expr("comments + 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(Comments{}).Where(&Comments{CommentId: comments.Origin}).Update(
+		"count", gorm.Expr("count + 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func LikeAComment(commentId uint) error {
+	if err := Db.Model(Comments{}).Where(&Comments{CommentId: commentId}).Update(
+		"likes", gorm.Expr("likes + 1")).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func DisLikeAComment(commentId uint) error {
+	if err := Db.Model(Comments{}).Where(&Comments{CommentId: commentId}).Update(
+		"likes", gorm.Expr("likes - 1")).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteComment(videoId, commentId, origin uint) (err error) {
+	tx := Db.Begin()
+	if err := tx.Model(Videos{}).Where(&Videos{VideoId: videoId}).Update(
+		"comments", gorm.Expr("comments - 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(Comments{}).Where(&Comments{CommentId: origin}).Update(
+		"count", gorm.Expr("count - 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := Db.Where(&Comments{CommentId: commentId}).Delete(&Comments{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func DeleteCommentVideo(videoId, commentId, count uint) (err error) {
+	tx := Db.Begin()
+	if err := tx.Model(Videos{}).Where(&Videos{VideoId: videoId}).Update(
+		"comments", gorm.Expr("comments - ?", count+1)).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := Db.Where(&Comments{CommentId: commentId}).Delete(&Comments{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := Db.Where(&Comments{Origin: commentId}).Delete(&Comments{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
 }
