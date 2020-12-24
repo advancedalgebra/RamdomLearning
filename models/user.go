@@ -164,6 +164,10 @@ func DeleteTransaction(username string, id uint) error {
 			return err
 		}
 	}
+	if err := tx.Where(&Histories{UserId: id}).Delete(&Histories{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
 	if err := Db.Select("follower").Where(&Follows{Followee: username}).Find(&followerList).Error; err != nil {
 		return err
 	}

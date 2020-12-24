@@ -14,6 +14,8 @@ type detail struct {
 	VideoName string
 	VideoId   uint
 	Count     uint
+	UserId    uint
+	NewName   string
 }
 
 type information struct {
@@ -101,6 +103,47 @@ func ViewVideo(c *gin.Context) {
 	}
 }
 
+func ViewVideoToken(c *gin.Context) {
+	var temp detail
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if history, err := models.QueryHistory(temp.UserId, temp.VideoId); err != nil {
+				//println("New")
+				if video, err := models.QueryVideoById(temp.VideoId); err != nil {
+					c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				} else {
+					history := models.Histories{VideoId: temp.VideoId, UserId: temp.UserId,
+						Path: video.Path, VideoName: video.Name, Count: 1}
+					if err := models.UpdateNewViewToken(temp.VideoId, &history); err != nil {
+						c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					} else {
+						c.JSON(http.StatusOK, gin.H{"message": "success"})
+					}
+				}
+			} else if history.DeletedAt == nil {
+				//println("no_del")
+				//println(history.DeletedAt)
+				if err := models.UpdateOldViewToken(temp.VideoId, temp.UserId); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, gin.H{"message": "success"})
+				}
+			} else {
+				//println("del")
+				history := models.Histories{VideoId: history.VideoId, UserId: history.UserId, Path: history.Path,
+					VideoName: history.VideoName, Count: history.Count + 1}
+				if err := models.UpdateDelViewToken(&history); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, gin.H{"message": "success"})
+				}
+			}
+		}
+	}
+}
+
 // 之后要加入不能删别人视频的检查（video的owner和username匹配）
 func UnLaunchVideo(c *gin.Context) {
 	var temp detail
@@ -153,5 +196,24 @@ func FindByCategory(c *gin.Context) {
 			CategorySLice = append(CategorySLice, v.Path)
 		}
 		c.JSON(http.StatusOK, CategorySLice)
+	}
+}
+
+func SetVideoName(c *gin.Context) {
+	var temp detail
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if _, err := models.QueryVideo(temp.NewName); err != nil {
+				if err := models.UpdateVideoName(temp.NewName, temp.VideoId); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				} else {
+					c.JSON(http.StatusOK, gin.H{"message": "success"})
+				}
+			} else {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Username already exist"})
+			}
+		}
 	}
 }

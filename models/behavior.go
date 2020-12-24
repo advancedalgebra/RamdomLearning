@@ -8,8 +8,19 @@ import (
 type Favorites struct {
 	VideoId   uint   `gorm:"ForeignKey:VideoId;primary_key;auto_increment:false"`
 	UserId    uint   `gorm:"ForeignKey:UserId;primary_key;auto_increment:false"`
-	Path      string `gorm:"not null"`
+	Path      string `gorm:"not null;ForeignKey:Path"`
 	CreatedAt time.Time
+	DeletedAt *time.Time `gorm:"default:null"`
+}
+
+type Histories struct {
+	HisId     uint   `gorm:"primary_key;auto-increment"`
+	VideoId   uint   `gorm:"ForeignKey:VideoId"`
+	VideoName string `gorm:"ForeignKey:Name"`
+	Path      string `gorm:"ForeignKey:Path"`
+	UserId    uint   `gorm:"ForeignKey:UserId"`
+	Count     uint
+	UpdatedAt time.Time
 	DeletedAt *time.Time `gorm:"default:null"`
 }
 
@@ -51,7 +62,7 @@ func DisFavoriteTransaction(id, uid uint) error {
 	return nil
 }
 
-func QueryPath(id uint) (video *Videos, err error) {
+func QueryVideoById(id uint) (video *Videos, err error) {
 	video = new(Videos)
 	if err = Db.Where(&Videos{VideoId: id}).First(&video).Error; err != nil {
 		return nil, err

@@ -8,11 +8,11 @@ import (
 
 type Videos struct {
 	VideoId   uint   `gorm:"primary_key;auto-increment"`
-	Name      string `gorm:"not null"`
+	Name      string `gorm:"not null;unique"`
 	Owner     string `gorm:"not null;ForeignKey:Username"`
 	Likes     uint   `gorm:"default:0"`
 	Favorites uint   `gorm:"default:0"`
-	Path      string `gorm:"not null"`
+	Path      string `gorm:"not null;unique"`
 	View      uint   `gorm:"default:0"`
 	Forward   uint   `gorm:"default:0"`
 	Size      uint   `gorm:"default:0"`
@@ -43,8 +43,41 @@ func UpdateForward(id uint) (err error) {
 }
 
 func UpdateView(id uint) (err error) {
-	err = Db.Model(Videos{}).Where(&Videos{VideoId: id}).Update(
-		"view", gorm.Expr("view + 1")).Error
+	err = Db.Model(Videos{}).Where(&Videos{VideoId: id}).Update("view", gorm.Expr("view + 1")).Error
+	return err
+}
+
+func QueryHistory(userid, videoId uint) (history *Histories, err error) {
+	history = new(Histories)
+	if err = Db.Unscoped().Order("updated_at desc").Where(&Histories{VideoId: videoId, UserId: userid}).First(&history).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
+func UpdateNewViewToken(id uint, histories *Histories) (err error) {
+	tx := Db.Begin()
+	if err := tx.Model(Videos{}).Where(&Videos{VideoId: id}).Update(
+		"view", gorm.Expr("view + 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(Histories{}).Create(&histories).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+func UpdateDelViewToken(histories *Histories) (err error) {
+	err = Db.Create(&histories).Error
+	return
+}
+
+func UpdateOldViewToken(id, userid uint) (err error) {
+	err = Db.Model(Histories{}).Where(&Histories{VideoId: id, UserId: userid}).Update(
+		"count", gorm.Expr("count + 1")).Error
 	return err
 }
 
@@ -95,6 +128,10 @@ func UnLaunchTransaction(username string, id, count uint) error {
 		tx.Rollback()
 		return err
 	}
+	if err := tx.Where(&Histories{VideoId: id}).Delete(&Histories{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
 	tx.Commit()
 	return nil
 }
@@ -142,6 +179,21 @@ func DisLikeTransaction(id uint) error {
 
 func QueryByCategory(category string) (videoList []*Categories, err error) {
 	if err = Db.Select("path").Where(&Categories{Category: category}).Find(&videoList).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
+func UpdateVideoName(newName string, videoId uint) error {
+	if err := Db.Model(Videos{}).Where(&Videos{VideoId: videoId}).Update("name", newName).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func QueryVideo(videoName string) (video *Videos, err error) {
+	video = new(Videos)
+	if err = Db.Unscoped().Where(&Videos{Name: videoName}).First(&video).Error; err != nil {
 		return nil, err
 	}
 	return

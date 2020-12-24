@@ -30,8 +30,10 @@ func InitRouter() *gin.Engine {
 		video.POST("/like", controllers.LikeVideo)
 		video.POST("/forward", controllers.ForwardVideo)
 		video.GET("/view", controllers.ViewVideo)
+		video.POST("/view_token", controllers.ViewVideoToken)
 		video.POST("/unlaunch", controllers.UnLaunchVideo)
 		video.POST("/dislike", controllers.DisLikeVideo)
+		video.POST("/rename", controllers.SetVideoName)
 		video.GET("/find_video_by_owner", controllers.FindVideosByOwner)
 		video.GET("/find_video_by_category", controllers.FindByCategory)
 	}

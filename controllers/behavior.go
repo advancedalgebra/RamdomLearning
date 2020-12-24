@@ -21,10 +21,10 @@ func FavoriteVideo(c *gin.Context) {
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			// 为了获得视频的路径
-			if path, err := models.QueryPath(temp.VideoId); err != nil {
+			if video, err := models.QueryVideoById(temp.VideoId); err != nil {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			} else {
-				video := models.Favorites{UserId: temp.UserId, Path: path.Path, VideoId: temp.VideoId}
+				video := models.Favorites{UserId: temp.UserId, Path: video.Path, VideoId: temp.VideoId}
 				if err := models.FavoriteTransaction(temp.VideoId, &video); err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				} else {
@@ -62,6 +62,25 @@ func FindFavoritesByUserId(c *gin.Context) {
 				PathSLice = append(PathSLice, v.Path)
 			}
 			c.JSON(http.StatusOK, PathSLice)
+		}
+	}
+}
+
+func FindHistory(c *gin.Context) {
+	var temp info
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if result, err := models.QueryFavoritesByUserId(temp.UserId); err != nil || len(result) == 0 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+			} else {
+				var PathSLice []string
+				for _, v := range result {
+					PathSLice = append(PathSLice, v.Path)
+				}
+				c.JSON(http.StatusOK, PathSLice)
+			}
 		}
 	}
 }
