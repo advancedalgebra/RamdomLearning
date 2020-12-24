@@ -9,9 +9,12 @@ import (
 )
 
 type info struct {
-	UserId   uint
-	VideoId  uint
-	Username string
+	UserId    uint
+	VideoId   uint
+	HistoryId uint
+	Username  string
+	begin     string
+	end       string
 }
 
 func FavoriteVideo(c *gin.Context) {
@@ -72,15 +75,43 @@ func FindHistory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
-			if result, err := models.QueryFavoritesByUserId(temp.UserId); err != nil || len(result) == 0 {
+			if result, err := models.QueryHistoriesByUserId(temp.UserId); err != nil || len(result) == 0 {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
 			} else {
-				var PathSLice []string
-				for _, v := range result {
-					PathSLice = append(PathSLice, v.Path)
-				}
-				c.JSON(http.StatusOK, PathSLice)
+				c.JSON(http.StatusOK, result)
 			}
 		}
 	}
 }
+
+func DeleteOneHistory(c *gin.Context) {
+	var temp info
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if err := models.DeleteOne(temp.HistoryId); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
+		}
+	}
+}
+
+//func DeleteRangeHistory(c *gin.Context) {
+//	var temp info
+//	if err := c.ShouldBind(&temp); err != nil {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//	} else {
+//		if utils.CheckToken(c, temp.Username) == "" {
+//			begin, _ := time.Parse("2006-01-02 15:04:05", temp.begin)
+//			println(begin.Format("2006-01-02 15:04:05"))
+//			//if err := models.DeleteRange(temp.begin, temp.end); err != nil {
+//			//	c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+//			//} else {
+//			//	c.JSON(http.StatusOK, gin.H{"message": "success"})
+//			//}
+//		}
+//	}
+//}

@@ -22,14 +22,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0e51632-b599-436a-b569-23a64d2c8c5c" name="Default Changelist" comment="awful bug solved">
+    <list default="true" id="e0e51632-b599-436a-b569-23a64d2c8c5c" name="Default Changelist" comment="video update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/behavior.go" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/behavior.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/video.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/behavior.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/behavior.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/video.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/router.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -119,7 +115,8 @@
     <MESSAGE value="have a rest before test" />
     <MESSAGE value="去除不必要的检查" />
     <MESSAGE value="awful bug solved" />
-    <option name="LAST_COMMIT_MESSAGE" value="awful bug solved" />
+    <MESSAGE value="video update" />
+    <option name="LAST_COMMIT_MESSAGE" value="video update" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -130,25 +127,25 @@
     </state>
     <state x="854" y="213" key="FileChooserDialogImpl/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1607861487258" />
     <state x="854" y="213" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1607697137626" />
-    <state width="1493" height="50" key="GridCell.Tab.0.bottom" timestamp="1608791861685">
+    <state width="1493" height="178" key="GridCell.Tab.0.bottom" timestamp="1608795974763">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="50" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608791861685" />
+    <state width="1493" height="178" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608795974763" />
     <state width="723" height="94" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1608359758427" />
-    <state width="1493" height="50" key="GridCell.Tab.0.center" timestamp="1608791861685">
+    <state width="1493" height="178" key="GridCell.Tab.0.center" timestamp="1608795974763">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="50" key="GridCell.Tab.0.center/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608791861685" />
+    <state width="1493" height="178" key="GridCell.Tab.0.center/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608795974763" />
     <state width="723" height="94" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1608359758427" />
-    <state width="1493" height="50" key="GridCell.Tab.0.left" timestamp="1608791861685">
+    <state width="1493" height="178" key="GridCell.Tab.0.left" timestamp="1608795974763">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="50" key="GridCell.Tab.0.left/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608791861685" />
+    <state width="1493" height="178" key="GridCell.Tab.0.left/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608795974763" />
     <state width="723" height="94" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1608359758427" />
-    <state width="1493" height="50" key="GridCell.Tab.0.right" timestamp="1608791861685">
+    <state width="1493" height="178" key="GridCell.Tab.0.right" timestamp="1608795974763">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="50" key="GridCell.Tab.0.right/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608791861685" />
+    <state width="1493" height="178" key="GridCell.Tab.0.right/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608795974763" />
     <state width="723" height="94" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1608359758427" />
     <state width="1493" height="339" key="GridCell.Tab.1.bottom" timestamp="1607923925384">
       <screen x="0" y="0" width="1536" height="824" />
@@ -170,10 +167,10 @@
     </state>
     <state width="1493" height="339" key="GridCell.Tab.1.right/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1607923925384" />
     <state width="1493" height="261" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1607867671700" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1608634556855">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1608792085712">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608634556855" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824/1920.-345.1920.1040@0.0.1536.824" timestamp="1608792085712" />
     <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1608213129005" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1608211980958">
       <screen x="0" y="0" width="1536" height="824" />

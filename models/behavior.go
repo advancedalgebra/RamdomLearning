@@ -76,3 +76,20 @@ func QueryFavoritesByUserId(id uint) (favoritesList []*Favorites, err error) {
 	}
 	return
 }
+
+func QueryHistoriesByUserId(id uint) (historyList []*Histories, err error) {
+	if err = Db.Where(&Histories{UserId: id}).Find(&historyList).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
+func DeleteOne(id uint) (err error) {
+	err = Db.Where(&Histories{HisId: id}).Delete(&Histories{}).Error
+	return
+}
+
+//func DeleteRange(begin, end time.Time) (err error) {
+//	err = Db.Where("created_at BETWEEN ? AND ?", begin, end).Delete(&Histories{}).Error
+//	return
+//}
