@@ -89,7 +89,7 @@ func DeleteOne(id uint) (err error) {
 	return
 }
 
-//func DeleteRange(begin, end time.Time) (err error) {
-//	err = Db.Where("created_at BETWEEN ? AND ?", begin, end).Delete(&Histories{}).Error
-//	return
-//}
+func DeleteRange(histList []uint) (err error) {
+	err = Db.Where("his_id in (?)", histList).Delete(&Histories{}).Error
+	return
+}

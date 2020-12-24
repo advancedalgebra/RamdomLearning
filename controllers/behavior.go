@@ -13,8 +13,7 @@ type info struct {
 	VideoId   uint
 	HistoryId uint
 	Username  string
-	begin     string
-	end       string
+	HisList   []uint
 }
 
 func FavoriteVideo(c *gin.Context) {
@@ -99,19 +98,18 @@ func DeleteOneHistory(c *gin.Context) {
 	}
 }
 
-//func DeleteRangeHistory(c *gin.Context) {
-//	var temp info
-//	if err := c.ShouldBind(&temp); err != nil {
-//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//	} else {
-//		if utils.CheckToken(c, temp.Username) == "" {
-//			begin, _ := time.Parse("2006-01-02 15:04:05", temp.begin)
-//			println(begin.Format("2006-01-02 15:04:05"))
-//			//if err := models.DeleteRange(temp.begin, temp.end); err != nil {
-//			//	c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
-//			//} else {
-//			//	c.JSON(http.StatusOK, gin.H{"message": "success"})
-//			//}
-//		}
-//	}
-//}
+func DeleteRangeHistory(c *gin.Context) {
+	var temp info
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			//println(temp.HisList)
+			if err := models.DeleteRange(temp.HisList); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
+		}
+	}
+}
