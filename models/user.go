@@ -204,6 +204,10 @@ func DeleteTransaction(username string, id uint) error {
 			tx.Rollback()
 			return err
 		}
+		if err := tx.Where(&Histories{VideoId: v.VideoId}).Delete(&Histories{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 	if err := tx.Where(&Videos{Owner: username}).Delete(&Videos{}).Error; err != nil {
 		tx.Rollback()
