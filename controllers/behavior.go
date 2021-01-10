@@ -35,18 +35,18 @@ type comDetail struct {
 func FavoriteVideo(c *gin.Context) {
 	var temp info
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			// 为了获得视频的路径
 			if video, err := models.QueryVideoById(temp.VideoId); err != nil {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				c.JSON(http.StatusUnauthorized, gin.H{"message": "error", "error": err.Error()})
 			} else {
 				video := models.Favorites{UserId: temp.UserId, Path: video.Path, VideoId: temp.VideoId}
 				if err := models.FavoriteTransaction(temp.VideoId, &video); err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 				} else {
-					c.JSON(http.StatusOK, video)
+					c.JSON(http.StatusOK, gin.H{"message": "success", "content": video})
 				}
 			}
 		}
@@ -56,11 +56,11 @@ func FavoriteVideo(c *gin.Context) {
 func DisFavoriteVideo(c *gin.Context) {
 	var temp info
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			if err := models.DisFavoriteTransaction(temp.VideoId, temp.UserId); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}
@@ -70,16 +70,16 @@ func DisFavoriteVideo(c *gin.Context) {
 
 func FindFavoritesByUserId(c *gin.Context) {
 	if id, err := strconv.Atoi(c.Query("user_id")); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if result, err := models.QueryFavoritesByUserId(uint(id)); err != nil || len(result) == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": "Nothing at all!"})
 		} else {
 			var PathSLice []string
 			for _, v := range result {
 				PathSLice = append(PathSLice, v.Path)
 			}
-			c.JSON(http.StatusOK, PathSLice)
+			c.JSON(http.StatusOK, gin.H{"message": "success", "content": PathSLice})
 		}
 	}
 }
@@ -87,13 +87,13 @@ func FindFavoritesByUserId(c *gin.Context) {
 func FindHistory(c *gin.Context) {
 	var temp info
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			if result, err := models.QueryHistoriesByUserId(temp.UserId); err != nil || len(result) == 0 {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": "Nothing at all!"})
 			} else {
-				c.JSON(http.StatusOK, result)
+				c.JSON(http.StatusOK, gin.H{"message": "success", "content": result})
 			}
 		}
 	}
@@ -102,11 +102,11 @@ func FindHistory(c *gin.Context) {
 func DeleteOneHistory(c *gin.Context) {
 	var temp info
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			if err := models.DeleteOne(temp.HistoryId); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": "Nothing at all!"})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}
@@ -117,12 +117,12 @@ func DeleteOneHistory(c *gin.Context) {
 func DeleteRangeHistory(c *gin.Context) {
 	var temp info
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			//println(temp.HisList)
 			if err := models.DeleteRange(temp.HisList); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Nothing at all!"})
+				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": "Nothing at all!"})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}
@@ -133,7 +133,7 @@ func DeleteRangeHistory(c *gin.Context) {
 func LaunchComment(c *gin.Context) {
 	var temp comDetail
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Commenter) == "" {
 			comment := models.Comments{Commenter: temp.Commenter, Content: temp.Content,
@@ -141,15 +141,15 @@ func LaunchComment(c *gin.Context) {
 			if temp.Type == "comment" {
 				comment.Count = temp.VideoId
 				if err := models.CreateComment(&comment, temp.VideoId); err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 				} else {
-					c.JSON(http.StatusOK, comment)
+					c.JSON(http.StatusOK, gin.H{"message": "success", "content": comment})
 				}
 			} else {
 				if err := models.CreateCommentVideo(&comment, temp.VideoId); err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 				} else {
-					c.JSON(http.StatusOK, comment)
+					c.JSON(http.StatusOK, gin.H{"message": "success", "content": comment})
 				}
 			}
 
@@ -160,11 +160,11 @@ func LaunchComment(c *gin.Context) {
 func LikeComment(c *gin.Context) {
 	var temp mess
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			if err := models.LikeAComment(temp.CommentId); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}
@@ -175,11 +175,11 @@ func LikeComment(c *gin.Context) {
 func DisLikeComment(c *gin.Context) {
 	var temp mess
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			if err := models.DisLikeAComment(temp.CommentId); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})
 			}
@@ -190,18 +190,18 @@ func DisLikeComment(c *gin.Context) {
 func DeleteComment(c *gin.Context) {
 	var temp mess
 	if err := c.ShouldBind(&temp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			if temp.Type == "video" {
 				if err := models.DeleteCommentVideo(temp.VideoId, temp.CommentId, temp.Count); err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 				} else {
 					c.JSON(http.StatusOK, gin.H{"message": "success"})
 				}
 			} else {
 				if err := models.DeleteComment(temp.VideoId, temp.CommentId, temp.Count); err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 				} else {
 					c.JSON(http.StatusOK, gin.H{"message": "success"})
 				}
