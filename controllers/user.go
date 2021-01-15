@@ -19,6 +19,7 @@ type message struct {
 	NewName  string
 	Follower string
 	UserId   uint
+	Icon     string
 }
 
 func Login(c *gin.Context) {
@@ -49,7 +50,7 @@ func Register(c *gin.Context) {
 	} else {
 		// 检查用户名是否重复
 		if _, err := models.QueryUserAll(temp.Username); err != nil {
-			user := models.Users{Username: temp.Username}
+			user := models.Users{Username: temp.Username, Icon: temp.Icon, Location: temp.Location}
 			auth := models.Auths{Username: temp.Username, UserId: user.UserId, Password: temp.Password}
 			if err := models.Commit(&user, &auth); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
@@ -99,6 +100,21 @@ func SetLocation(c *gin.Context) {
 	} else {
 		if utils.CheckToken(c, temp.Username) == "" {
 			if err := models.UpdateUser("location", temp.Location, temp.Username); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"message": "success"})
+			}
+		}
+	}
+}
+
+func SetIcon(c *gin.Context) {
+	var temp message
+	if err := c.ShouldBind(&temp); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
+	} else {
+		if utils.CheckToken(c, temp.Username) == "" {
+			if err := models.UpdateUser("icon", temp.Icon, temp.Username); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
 			} else {
 				c.JSON(http.StatusOK, gin.H{"message": "success"})

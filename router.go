@@ -17,6 +17,7 @@ func InitRouter() *gin.Engine {
 		auth.POST("/logout", controllers.Logout)
 		auth.POST("/teacher", controllers.SetTeacher)
 		auth.POST("/location", controllers.SetLocation)
+		auth.POST("/icon", controllers.SetIcon)
 		auth.POST("/rename", controllers.SetUsername)
 		auth.POST("/delete_user", controllers.DeleteUser)
 		auth.POST("/follow", controllers.Follow)

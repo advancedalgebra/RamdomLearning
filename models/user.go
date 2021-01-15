@@ -7,7 +7,8 @@ import (
 )
 
 type Users struct {
-	UserId      uint   `gorm:"primary_key;auto-increment"`
+	UserId      uint `gorm:"primary_key;auto-increment"`
+	Icon        string
 	Identity    string `gorm:"default:'student'"`
 	Username    string `gorm:"not null;unique"`
 	Follower    uint   `gorm:"default:0"`
