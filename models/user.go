@@ -54,6 +54,14 @@ func QueryUserAll(username string) (user *Users, err error) {
 	return
 }
 
+func QueryUser(id uint) (user *Users, err error) {
+	user = new(Users)
+	if err = Db.Where(&Users{UserId: id}).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
 func QueryAuth(username, attribute, value string) (auth *Auths, err error) {
 	auth = new(Auths)
 	if err = Db.Where(map[string]interface{}{"username": username, attribute: value}).First(&auth).Error; err != nil {

@@ -277,3 +277,15 @@ func FindFollowing(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "success", "content": FollowingSLice})
 	}
 }
+
+func ViewUser(c *gin.Context) {
+	if id, err := strconv.Atoi(c.Query("user_id")); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
+	} else {
+		if user, err := models.QueryUser(uint(id)); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": "Nothing at all!"})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"message": user})
+		}
+	}
+}

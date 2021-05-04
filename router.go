@@ -24,6 +24,7 @@ func InitRouter() *gin.Engine {
 		auth.POST("/unfollow", controllers.UnFollow)
 		auth.GET("/find_follower", controllers.FindFollower)
 		auth.GET("/find_following", controllers.FindFollowing)
+		auth.GET("/view_user", controllers.ViewUser)
 	}
 	video := router.Group("/video")
 	{
@@ -37,6 +38,7 @@ func InitRouter() *gin.Engine {
 		video.POST("/rename", controllers.SetVideoName)
 		video.GET("/find_video_by_owner", controllers.FindVideosByOwner)
 		video.GET("/find_video_by_category", controllers.FindByCategory)
+		video.GET("/find_tag", controllers.FindById)
 	}
 	UserBehavior := router.Group("/behavior")
 	{

@@ -185,6 +185,14 @@ func QueryByCategory(category string) (videoList []*Categories, err error) {
 	return
 }
 
+func QueryTagById(id uint) (video *Categories, err error) {
+	video = new(Categories)
+	if err = Db.Where(&Categories{VideoId: id}).First(&video).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
 func UpdateVideoName(newName string, videoId uint) error {
 	if err := Db.Model(Videos{}).Where(&Videos{VideoId: videoId}).Update("name", newName).Error; err != nil {
 		return err

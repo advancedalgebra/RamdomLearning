@@ -199,6 +199,29 @@ func FindByCategory(c *gin.Context) {
 	}
 }
 
+func FindById(c *gin.Context) {
+	//for i := 0; i <= 500000; i++ {
+	//	if id, err := strconv.Atoi(c.Query("video_id")); err != nil {
+	//		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
+	//	} else {
+	//		if result, err := models.QueryTagById(uint(id)); err != nil {
+	//			c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": "Nothing at all!"})
+	//		} else {
+	//			c.JSON(http.StatusOK, gin.H{"message": result})
+	//		}
+	//	}
+	//}
+	if id, err := strconv.Atoi(c.Query("video_id")); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": err.Error()})
+	} else {
+		if result, err := models.QueryTagById(uint(id)); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "error", "error": "Nothing at all!"})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"message": result})
+		}
+	}
+}
+
 func SetVideoName(c *gin.Context) {
 	var temp detail
 	if err := c.ShouldBind(&temp); err != nil {
